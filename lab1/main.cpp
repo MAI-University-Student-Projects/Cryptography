@@ -1,50 +1,23 @@
 #include <iostream>
-#include <fstream>
 #include <algorithm>
-#include <vector>
-#include <exception>
-
-void sieve_eratosthenes(size_t m) {
-    std::vector<bool> is_prime(m, true);
-    std::ofstream f_out("eratosth_output.txt", std::ios::out);
-//    p * q = M, p <= q -> max p: p * p = M -> p <= sqrt(M)
-    for(int i = 2; i * i < m; ++i) {
-        if(!is_prime[i])
-            continue;
-        for(int j = i * i; j < m; j += i)
-            is_prime[j] = false;
-    }
-    
-    for(int i = 0; i < is_prime.size(); ++i) {
-        if(is_prime[i])
-            f_out << i << ' ';
-    }
-}
-
-int pow_mod(int a, int n, int m) {
-    if(n < 1 || m < 1)
-        throw std::invalid_argument("non-natural argument");
-    int res = 1;
-    while(n > 0) {
-//        проверку на четность можно реализовать по последнему биту двоичной записи (2^0 ==? 1)
-        if(n & 1) {
-//            при нечетной степени и при первой
-            res = res * a % m;
-            n--;
-        }
-        else {
-            a = a * a % m;
-//            >> ~ /2 (см перемещ '1' вправо в двоич. записи); соотв << ~ *2
-            n = n >> 1;
-        }
-    }
-    return res;
-}
+#include "primes.hpp"
+#include "modular.hpp"
 
 int main(int argc, const char * argv[]) {
 //    write menu
-//    sieve_eratosthenes(100000);
-    std::cout << pow_mod(5, 3, 11) << std::endl;
+    
+//    auto res = inf_secure::primes_n(2000);
+//    std::for_each(res.cbegin(), res.cend(), [](auto val){ std::cout << val << " "; });
+    static_assert(inf_secure::fast_pow_mod(249, 321, 499) == 447);
+        
+    static_assert(inf_secure::sum_mod(1723345, 2124945, 11) == 6);
+    static_assert(inf_secure::sub_mod(1723345, 2124945, 11) == 10);
+    static_assert(inf_secure::mul_mod(1723345, 2124945, 11) == 6);
+
+    auto [d, x, y] = inf_secure::ext_gcd(26, 11);
+    std::cout << d << " " << x << " " << y << " " << inf_secure::mod(26, 11);
+    
+    static_assert(inf_secure::div_mod(145, 11, 26) == 25); //145 * 19 mod 26
     return 0;
 }
 
