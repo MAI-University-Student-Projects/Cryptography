@@ -18,6 +18,15 @@ int main(int argc, const char * argv[]) {
     std::cout << d << " " << x << " " << y << " " << inf_secure::mod(26, 11);
     
     static_assert(inf_secure::div_mod(145, 11, 26) == 25); //145 * 19 mod 26
+
+#ifdef CLASS
+    constexpr auto a = Zn<11>(1723345l);
+    constexpr auto b = Zn<11>(2124945l);
+
+    static_assert(a + b == 6);
+    static_assert(a - b == 10);
+    static_assert(a * b == 6);
+#endif
     return 0;
 }
 
