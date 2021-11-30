@@ -18,78 +18,50 @@ constexpr T mod(T a, T b) {
 
 // right-to-left
 template<Integer T>
-constexpr T fast_pow_mod(T val, T ord, T m) {
+constexpr T fast_pow_mod(T val, T power, const T& m) {
     T res = 1;
-    while(ord > 0) {
-        if(ord & 1) res = mod(res * val, m);
+    while(power > 0) {
+        if (power & 1) res = mod(res * val, m);
         val = mod(val * val, m);
-        ord = ord >> 1;
+        power = power >> 1;
     }
     return res;
 }
 
-#ifndef CLASS
-
-template<Integer T>
-constexpr std::tuple<T, std::make_signed_t<T>, std::make_signed_t<T>> ext_gcd(T a, T b)
-{
-    using T_ = std::make_signed_t<T>;
-    if constexpr(std::is_unsigned_v<T>) {
-        if(a / b > std::numeric_limits<T_>::max())
-            throw "overflow threat";
-    }
-    
-    T r = a, r_ = b; 
-    T_ x = 1, x_ = 0, y = 0, y_ = 1;
-    while(r_ > 0) {
-        x = x - (r / r_) * x_; std::swap(x, x_);
-        y = y - (r / r_) * y_; std::swap(y, y_);
-        r = r % r_; std::swap(r, r_);
-    }
-    
-    return {r, x, y};
-}
-
-template<Integer T>
-constexpr T pow_mod(T val, T ord, T m) {
-    if(ord < 0) {
-        auto [d, x, y] = ext_gcd(m, val);
-        return (d == 1) ? fast_pow_mod(y, -ord, m) : throw "uninvertable";
-    }
-    return fast_pow_mod(val, ord, m);
-}
-
-template<Integer T>
-constexpr T sum_mod(T lhs, T rhs, T m) { return mod(mod(lhs, m) + mod(rhs, m), m); }
-
-template<Integer T>
-constexpr T sub_mod(T lhs, T rhs, T m) { return mod(mod(lhs, m) - mod(rhs, m), m); }
-
-template<Integer T>
-constexpr T mul_mod(T lhs, T rhs, T m) { return mod(mod(lhs, m) * mod(rhs, m), m); }
-
-template<Integer T>
-constexpr T div_mod(T lhs, T rhs, T m) { 
-    T rhs_1 = pow_mod(rhs, -1, m);
-    return mul_mod(lhs, rhs_1, m);
-}
-
-#endif
-
-#ifdef CLASS
-
-template<size_t Modulus_, Integer T>
+template<size_t Modulus_>
     requires (Modulus_ > 0)
 class Zn_type final {
-public:
-    using integer_t = T;
 
-private:
-    integer_t value_ = 0;
+    size_t value_ = 0;
+
+    constexpr size_t extend_gcd_modulus_(size_t a, size_t b, long long& x, long long& y) const {
+        if(a == 0) {
+            x = 0;
+            y = 1;
+            return b;
+        }
+        long long x_tmp, y_tmp;
+        size_t gcd = extend_gcd_modulus_(b % a, a, x_tmp, y_tmp);
+        x = y_tmp - (b / a) * x_tmp;
+        y = x_tmp;
+        return gcd;
+    }
 
 public:
     constexpr Zn_type() = default;
-    explicit constexpr Zn_type(integer_t val) : value_(val < 0 ? Modulus_ == 1 ? 0 : Modulus_ - ((-val) % Modulus_) : val % Modulus_) {}
+
+    template<Integer T>
+    explicit constexpr Zn_type(const T& val) : value_(val < 0 ? Modulus_ == 1 ? 0 : Modulus_ - ((-val) % Modulus_) : val % Modulus_) {}
+
+    constexpr Zn_type invert() const {
+        long long x, y;
+        return extend_gcd_modulus_(value_, Modulus_, x, y) == 1 ? Zn_type{x} : throw "uninvertable"; 
+    }
+
+    constexpr Zn_type pow(long long ord) const {
+        return ord < 0 ? Zn_type{ fast_pow_mod(value_, static_cast<size_t>(-ord), Modulus_) } 
+                        : Zn_type{ fast_pow_mod(value_, static_cast<size_t>(ord), Modulus_) };
+    }
 
     constexpr Zn_type& operator+=(const Zn_type& oth) { 
         if((value_ += oth.value_) >= Modulus_) value_ -= Modulus_;
@@ -109,23 +81,20 @@ public:
         return *this;
     }
 
-    constexpr integer_t get_remainder() const { return value_; }
+    constexpr size_t get_remainder() const { return value_; }
 };
 
-template<size_t Mod_, Integer T>
-constexpr Zn_type<Mod_, T> Zn(T value) { return Zn_type<Mod_, T>(value); }
+template<size_t Mod_>
+constexpr size_t operator+(Zn_type<Mod_> lhs, const Zn_type<Mod_>& rhs) { lhs += rhs; return lhs.get_remainder(); }
 
-template<size_t Mod_, Integer T>
-constexpr T operator+(Zn_type<Mod_, T> lhs, const Zn_type<Mod_, T>& rhs) { lhs += rhs; return lhs.get_remainder(); }
+template<size_t Mod_>
+constexpr size_t operator-(Zn_type<Mod_> lhs, const Zn_type<Mod_>& rhs) { lhs -= rhs; return lhs.get_remainder(); }
 
-template<size_t Mod_, Integer T>
-constexpr T operator-(Zn_type<Mod_, T> lhs, const Zn_type<Mod_, T>& rhs) { lhs -= rhs; return lhs.get_remainder(); }
+template<size_t Mod_>
+constexpr size_t operator*(Zn_type<Mod_> lhs, const Zn_type<Mod_>& rhs) { lhs *= rhs; return lhs.get_remainder(); }
 
-template<size_t Mod_, Integer T>
-constexpr T operator*(Zn_type<Mod_, T> lhs, const Zn_type<Mod_, T>& rhs) { lhs *= rhs; return lhs.get_remainder(); }
+template<size_t Mod_>
+constexpr size_t operator/(Zn_type<Mod_> lhs, const Zn_type<Mod_>& rhs) { lhs *= rhs.invert(); return lhs.get_remainder(); }
 
-#endif
-
-}
 
 #endif

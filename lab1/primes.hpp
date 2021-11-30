@@ -26,7 +26,7 @@ std::vector<T> primes_n(T num) {
     std::vector<T> res;
     res.reserve(num / log(num)); // estimation for amount of primes before n
     for(size_t i = 0; i < sieve.size(); ++i) {
-        if(sieve[i]) res.push_back(i);
+        if(sieve[i]) res.emplace_back(i);
     }
     return res;
 }
