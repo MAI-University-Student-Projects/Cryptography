@@ -11,7 +11,7 @@ template<typename T>
 concept Integer = std::is_integral_v<T> && (!std::is_same_v<T, bool>);
 
 template<Integer T>
-constexpr T mod(T a, T b) { 
+constexpr T mod(const T& a, const T& b) {
     T m = a % b;
     return (m > 0) ? m : (b > 0) ? (m + b) : (m - b); 
 }
@@ -48,8 +48,6 @@ class Zn_type final {
     }
 
 public:
-    constexpr Zn_type() = default;
-
     template<Integer T>
     explicit constexpr Zn_type(const T& val) : value_(val < 0 ? Modulus_ == 1 ? 0 : Modulus_ - ((-val) % Modulus_) : val % Modulus_) {}
 
@@ -59,7 +57,7 @@ public:
     }
 
     constexpr Zn_type pow(long long ord) const {
-        return ord < 0 ? Zn_type{ fast_pow_mod(value_, static_cast<size_t>(-ord), Modulus_) } 
+        return ord < 0 ? this->invert().pow(static_cast<size_t>(-ord))
                         : Zn_type{ fast_pow_mod(value_, static_cast<size_t>(ord), Modulus_) };
     }
 
@@ -96,5 +94,6 @@ constexpr size_t operator*(Zn_type<Mod_> lhs, const Zn_type<Mod_>& rhs) { lhs *=
 template<size_t Mod_>
 constexpr size_t operator/(Zn_type<Mod_> lhs, const Zn_type<Mod_>& rhs) { lhs *= rhs.invert(); return lhs.get_remainder(); }
 
+}
 
 #endif
