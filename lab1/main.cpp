@@ -14,6 +14,12 @@ int main(int argc, const char * argv[]) {
     std::cout << a.deg() << std::endl;
     std::cout << a << std::endl;
     
+    Poly1D_type j1 = {-4, 0, -2, 1}, j2 = {-3, 1};
+    std::cout << j1 << std::endl << j2 << std::endl;
+    auto [qu, re] = j1 / j2;
+    std::cout << qu << std::endl << re << std::endl;
+    std::cout << j1 * j2 << std::endl;
+    
     return 0;
 }
 
