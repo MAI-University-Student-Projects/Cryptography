@@ -1,7 +1,7 @@
 # add_library(modular_arithmetics modular.hpp modular.cpp) #for header only INTERFACE key-word must be used
-# add_library(polynomial_arithmetics polynomial.hpp polynomial.cpp)
+# add_library(polynomial_arithmetics vector_polynomial.hpp polynomial.hpp)
 
-add_executable(lab1 main.cpp primes.hpp modular.hpp polynomial.hpp)
+add_executable(lab1 main.cpp primes.hpp modular.hpp vector_polynomial.hpp polynomial.hpp)
 
 # target_link_libraries(lab1 PRIVATE modular_arithmetics polynomial_arithmetics)
 

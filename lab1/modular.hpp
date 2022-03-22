@@ -56,7 +56,7 @@ public:
         return extend_gcd_modulus_(value_, Modulus_, x, y) == 1 ? Zn_type{x} : throw "uninvertable"; 
     }
 
-    constexpr Zn_type pow(long long ord) const {
+    constexpr Zn_type pow(int ord) const {
         return ord < 0 ? this->invert().pow(static_cast<size_t>(-ord))
                         : Zn_type{ fast_pow_mod(value_, static_cast<size_t>(ord), Modulus_) };
     }
